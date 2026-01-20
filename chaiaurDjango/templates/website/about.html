@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About | Himanshu</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">Himanshu.dev</div>
+        <nav>
+            <a href="{% url 'home' %}">Home</a>
+            <a href="{% url 'about' %}">About</a>
+            <a href="{% url 'projects' %}">Projects</a>
+            <a href="{% url 'skills' %}">Skills</a>
+            <a href="{% url 'contact' %}">Contact</a>
+        </nav>
+    </header>
+
+    <main class="hero">
+        <div class="hero-text">
+            <h1>About Me</h1>
+            <p>
+                I’m a Computer Science student focused on backend development and
+                system-level thinking. I work primarily with Python and Django,
+                aiming to build clean, scalable, and maintainable web applications.
+            </p>
+
+            <p>
+                I believe strong fundamentals beat flashy frameworks.
+                I prioritize data flow, architecture, and performance over shortcuts.
+            </p>
+
+            <p>
+                Currently learning advanced Django patterns, databases,
+                and real-world project design.
+            </p>
+        </div>
+
+        <div class="hero-card">
+            <h3>Technical Snapshot</h3>
+            <ul>
+                <li>Language: Python</li>
+                <li>Framework: Django</li>
+                <li>Frontend: HTML, CSS, JS</li>
+                <li>Database: SQLite, PostgreSQL</li>
+                <li>Tools: Git, GitHub, VS Code</li>
+                <li>OS: Windows / Linux</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2026 Himanshu · Learning by building</p>
+    </footer>
+
+</body>
+</html>
