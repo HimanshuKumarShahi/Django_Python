@@ -1,9 +1,82 @@
 {% extends "layout.html" %}
 
 {% block title %}
+Chai Page
+{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <!-- Heading -->
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-10">
+        Chai Django Collection
+    </h1>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for chai in chais %}
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition duration-300 overflow-hidden">
+
+            <!-- Image -->
+            <img 
+                src="{{ chai.image.url }}" 
+                alt="{{ chai.name }}"
+                class="w-full h-56 object-cover"
+            >
+
+            <!-- Card Content -->
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                    {{ chai.name }}
+                </h3>
+
+                <!-- Type Badge -->
+                <button 
+                    type="button"
+                    class="inline-block mb-3 px-4 py-1.5 rounded-full
+                           bg-amber-100 text-amber-700 text-sm font-semibold
+                           hover:bg-amber-200 transition"
+                >
+                    {{ chai.types }} · #{{ chai.id }}
+                </button>
+
+                <p class="text-gray-600 text-sm leading-relaxed">
+                    {{ chai.description }}
+                </p>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% comment %} {% extends "layout.html" %}
+
+{% block title %}
 Chai page
 {% endblock  %}
 
 {% block content %}
 <h1>Chai Django in chai folder</h1>
-{% endblock %}
+
+<div class='grid grid-cols-3 gap-4 m-4'>
+{% for chai in chais %}
+<div class="bg-blue-500 text-black p-5 rounded">
+    <img class='rounded shadow-lg' src="{{ chai.image.url }}" alt="{{ chai.name }}">
+    <h3 class='text-2xl font-bold'>{{ chai.name }}</h3>
+    <button type='button' class=" bg-amber-100 text-amber-700 font-semibold
+               hover:bg-amber-200 transition duration-200">
+        {{chai.types}} - {{chai.id}}
+    </button>
+    <p>{{ chai.description }}</p>
+</div>
+{% endfor %}
+</div>
+
+{% endblock %} {% endcomment %}
