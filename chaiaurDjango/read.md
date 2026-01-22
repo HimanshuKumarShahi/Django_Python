@@ -77,3 +77,16 @@ class ChaiVariety(models.Model):
   def __str__(self):
     return self.name
 ```
+
+## using pillow add images in DB.
+```python
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    #...
+    #...
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
