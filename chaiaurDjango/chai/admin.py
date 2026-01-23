@@ -1,5 +1,22 @@
 from django.contrib import admin
-from .models import ChaiVarity
+from .models import ChaiVarity,ChaiReview,ChaiCertificate,store
 
 # Register your models here.
-admin.site.register(ChaiVarity)
+class ChaiReviewInline(admin.TabularInline):
+    model=ChaiReview
+    extra=1
+
+class ChaiVarietyAdmin(admin.ModelAdmin):
+    list_display=('name','types','date_added')
+    inlines=[ChaiReviewInline]
+
+class StoreAdmin(admin.ModelAdmin):
+    list_display=('name','location')
+    filter_horizontal=('chai_Varities',)
+
+class ChaiCertificateAdmin(admin.ModelAdmin):
+    list_display=('chai','certificate_number')
+
+admin.site.register(ChaiVarity,ChaiVarietyAdmin)
+admin.site.register(store,StoreAdmin)
+admin.site.register(ChaiCertificate,ChaiCertificateAdmin)
