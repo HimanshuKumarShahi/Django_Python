@@ -32,3 +32,25 @@ Password: "Create Your PassWord."
 
 Access Admin on localhost 8000: http://localhost:8000/admin/
 
+
+# Setting.py 
+``` python
+import os
+
+STATIC_URL = 'static/'
+STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+```
+# Urls.py
+``` python
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+```
