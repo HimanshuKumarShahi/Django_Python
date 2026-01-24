@@ -33,7 +33,7 @@ Password: "Create Your PassWord."
 Access Admin on localhost 8000: http://localhost:8000/admin/
 
 
-# Setting.py 
+## Setting.py 
 ``` python
 import os
 
@@ -43,7 +43,7 @@ STATICFILES_DIRS=[os.path.join(BASE_DIR,'static')]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ```
-# Urls.py
+## Urls.py
 ``` python
 
 from django.conf import settings
@@ -53,4 +53,48 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 ] + static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
 
+```
+
+## creating app in Django
+``` python
+python manage.py startapp App_Name
+```
+Using this above command create app. inside the app add "urls.py" & "views.py 👇🏼"
+
+## urls.py
+``` python
+
+from . import views
+from django.urls import path
+
+urlpatterns = [
+    # path('admin/', admin.site.urls),
+
+    path('', views.index,name='index'),
+
+] 
+```
+## views.py
+``` python
+from django.shortcuts import render
+
+# Create your views here.
+def index(request):
+    return render(request,'index.html')
+```
+Now add your app in "settings.py"
+``` python 
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'Your App Name',    <-- Here
+]
+
+ ## add Dirs =[templates] in "settings.py"
+  
+'DIRS': [os.path.join(BASE_DIR, 'templates')],
 ```
