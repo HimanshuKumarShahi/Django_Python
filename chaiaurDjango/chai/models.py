@@ -34,7 +34,7 @@ class ChaiReview(models.Model):
         return f'{self.user.username} review for {self.chai.name}'
     
 # many to many
-class store(models.Model):
+class Store(models.Model):
     name=models.CharField(max_length=50)
     location=models.CharField(max_length=100)
     chai_Varities=models.ManyToManyField(ChaiVarity,related_name='stores')

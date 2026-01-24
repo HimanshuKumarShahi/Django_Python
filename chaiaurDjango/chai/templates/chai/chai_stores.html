@@ -1,0 +1,89 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to- from-amber-50 to-orange-100 px-4 py-10">
+  <div class="max-w-3xl mx-auto">
+
+    <!-- Page Card -->
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-xl p-6 sm:p-8">
+
+      <!-- Title -->
+      <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 text-center mb-6">
+        Chai Store Finder ☕
+      </h1>
+
+      <!-- Form -->
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Select Chai Variety
+          </label>
+
+          <div class="w-full">
+            {{ form.chai_varity }}
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-amber-600 hover:bg-amber-700 active:bg-amber-800
+                 text-white font-bold py-3 rounded-xl transition
+                 focus:outline-none focus:ring-4 focus:ring-amber-300"
+        >
+          Search Stores
+        </button>
+      </form>
+
+      <!-- Results -->
+      {% if stores %}
+      <div class="mt-10">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
+          Stores Available
+        </h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {% for store in stores %}
+          <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 hover:bg-white hover:shadow-lg transition">
+            <h3 class="text-lg font-semibold text-gray-900">
+              {{ store.name }}
+            </h3>
+            <p class="text-sm text-gray-600 mt-1">
+              📍 {{ store.location }}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+{% comment %} {% extends 'layout.html' %}
+
+{% block content %}
+  <h1>Chai Stores</h1>
+  <form method="post">
+    {% csrf_token %}
+      {{ form.as_p }}
+    <button type="submit">Search Stores</button>
+  </form>
+  {% if stores %}
+    <h2>Stores with selected Chai Variety</h2>
+    <ul>
+      {% for store in stores %}
+      <li>{{ store.name }} - {{ store.location }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock %} {% endcomment %}
