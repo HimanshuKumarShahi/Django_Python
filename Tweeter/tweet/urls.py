@@ -4,6 +4,6 @@ from django.urls import path
 urlpatterns = [
     # path('admin/', admin.site.urls),
 
-    path('', views.index,name='index'),
+    path('tweet/', views.index,name='index'),
 
 ] 
