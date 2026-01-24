@@ -1,6 +1,6 @@
-#Django project : 
+# Django project : 
 
-##Environment Setup:
+## Environment Setup:
  ```Django
 python -m venv .venv
 
