@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home page -> Tweeter page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #1d9bf0; /* Twitter Blue */
+    --dark-bg: #000000;
+    --text-main: #ffffff;
+    --text-muted: #71767b;
+}
+
+/* 2. Body & Layout */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--dark-bg);
+    color: var(--text-main);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* 3. Container styling */
+.hero-container {
+    text-align: center;
+    padding: 20px;
+}
+
+/* 4. Typography */
+.title {
+    font-size: 4rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* 5. The Button (Anchor tag as a button) */
+.app-button {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 9999px; /* Pill shape */
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 15px rgba(29, 155, 240, 0.3);
+}
+
+.app-button:hover {
+    background-color: #1a8cd8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(29, 155, 240, 0.4);
+}
+
+.app-button:active {
+    transform: translateY(0);
+}
+
+.app-button span {
+    margin-left: 8px;
+}
+    </style>
+</head>
+<body>
+    <main class="hero-container">
+        <h1 class="title">Welcome</h1>
+        <p class="subtitle">Ready to see what's happening in the world?</p>
+        <a href="http://127.0.0.1:8000/tweet/" class="app-button">
+            Go to App <span>😎</span>
+        </a>
+    </main>
+</body>
+</html>
