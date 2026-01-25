@@ -206,7 +206,7 @@ TEMPLATES = [
 ```
 
 ---
-# Links to setup Djanho: 
+# Links to setup Django: 
  ```
 https://docs.chaicode.com/youtube/chai-aur-django/welcome/
  ```
