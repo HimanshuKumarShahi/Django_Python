@@ -106,12 +106,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 ```python
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path('your_app_name/',include('App_Name_urls') ),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
 
@@ -205,3 +206,8 @@ TEMPLATES = [
 ```
 
 ---
+# Links to setup Djanho: 
+ ```
+https://docs.chaicode.com/youtube/chai-aur-django/welcome/
+ ```
+ link: https://docs.chaicode.com/youtube/chai-aur-django/welcome/

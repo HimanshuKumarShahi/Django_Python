@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testing Phase</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Reset and Base Styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #0f172a; /* Dark Slate */
+        font-family: "Inter", sans-serif;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f8fafc;
+      }
+
+      /* Card Styling */
+      .card {
+        background: #1e293b;
+        padding: 3rem;
+        border-radius: 24px;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid #334155;
+        max-width: 400px;
+      }
+
+      /* Typography */
+      h1 {
+        font-size: 3rem;
+        font-weight: 900;
+        margin-bottom: 1rem;
+        letter-spacing: -1px;
+      }
+
+      .highlight {
+        color: #fbbf24; /* Amber Gold */
+      }
+
+      p {
+        color: #94a3b8;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+      }
+
+      /* Badge */
+      .badge {
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+      }
+
+      /* Buttons */
+      .btn-group {
+        display: flex;
+        gap: 12px;
+      }
+
+      button {
+        flex: 1;
+        padding: 0.8rem;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          background 0.2s;
+        border: none;
+      }
+
+      .btn-primary {
+        background: #fbbf24;
+        color: #0f172a;
+      }
+
+      .btn-primary:hover {
+        background: #f59e0b;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #334155;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #475569;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <span class="badge">System Active</span>
+      <h1>Hello <span class="highlight">Boss</span></h1>
+      <p>The testing phase is initialized. Ready for deployment.</p>
+      <div class="btn-group">
+        <button class="btn-primary">Execute</button>
+        <button class="btn-secondary">Logs</button>
+      </div>
+    </div>
+  </body>
+</html>
