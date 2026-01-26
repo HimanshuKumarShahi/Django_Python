@@ -1,7 +1,57 @@
 {% extends "layout.html" %}
 
+{% block title %}Logged Out / Tweeter 🤖{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-12 col-md-8 col-lg-5 text-center">
+        
+        <div class="mb-4">
+            <div class="display-1 opacity-25">👋</div>
+        </div>
+
+        <h2 class="fw-bold mb-3">You've been signed out</h2>
+        <p class="text-secondary mb-5">Thanks for spending some time with us today. See you again soon!</p>
+
+        <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+            <a href="{% url 'login' %}" class="btn btn-tweet px-5 py-2 fw-bold">
+                Log Back In
+            </a>
+            <a href="{% url 'tweet_list' %}" class="btn btn-outline-custom px-5 py-2 fw-bold">
+                Return Home
+            </a>
+        </div>
+
+        <div class="mt-5 pt-5 opacity-50">
+            <p class="small text-secondary">Tweeter Space 🤖 — Your corner of the internet.</p>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Adding a subtle animation to the wave emoji */
+    @keyframes wave {
+        0% { transform: rotate(0deg); }
+        20% { transform: rotate(15deg); }
+        40% { transform: rotate(-10deg); }
+        60% { transform: rotate(15deg); }
+        100% { transform: rotate(0deg); }
+    }
+    
+    .display-1 {
+        display: inline-block;
+        animation: wave 2s infinite;
+        transform-origin: 70% 70%;
+    }
+</style>
+{% endblock %}
+
+
+{% comment %} {% extends "layout.html" %}
+
 {% block content %}
     <h2>Logged Out </h2>
  
 <p>You have been logged out. <a href="{% url 'login' %}">Login again</a></p>
-{% endblock %}
+{% endblock %} {% endcomment %}

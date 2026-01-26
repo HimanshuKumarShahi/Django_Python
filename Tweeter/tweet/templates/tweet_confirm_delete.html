@@ -1,5 +1,64 @@
 {% extends "layout.html" %}
 
+{% block title %}Confirm Delete / Tweeter{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+    <div class="col-12 col-md-8 col-lg-5">
+        
+        <div class="card border-0 shadow-lg" style="background-color: #16181c; border: 1px solid #2f3336; border-radius: 24px;">
+            <div class="card-body p-4 p-md-5 text-center">
+                
+                <div class="mb-4">
+                    <div class="display-4 text-danger opacity-75">⚠️</div>
+                </div>
+
+                <h2 class="fw-bold text-white mb-3">Delete Tweet?</h2>
+                <p class="text-secondary mb-4">
+                    This action cannot be undone. This will permanently remove the tweet from your profile and the timeline of anyone who follows you.
+                </p>
+
+                <form method="post" class="d-grid gap-2">
+                    {% csrf_token %}
+                    
+                    <button type="submit" class="btn btn-danger py-2 fw-bold rounded-pill">
+                        Delete Permanently
+                    </button>
+                    
+                    <a href="{% url 'tweet_list' %}" class="btn btn-outline-custom py-2 fw-bold rounded-pill mt-2">
+                        Cancel and Keep Tweet
+                    </a>
+                </form>
+
+            </div>
+        </div>
+
+        <p class="text-center text-secondary small mt-4">
+            Mistakes happen! If you just want to fix a typo, try <a href="{% url 'tweet_edit' tweet.id %}" class="btn btn-success btn-sm rounded-pill px-3">
+        Edit
+    </a> the tweet instead.
+        </p>
+
+    </div>
+</div>
+
+<style>
+    /* Styling for the custom outline button to match the rest of the app */
+    .btn-outline-custom {
+        border: 1px solid #536471;
+        color: #eff3f4;
+        transition: background 0.2s;
+    }
+    .btn-outline-custom:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+</style>
+{% endblock %}
+
+
+{% comment %} {% extends "layout.html" %}
+
 {% block title %}
 Delete  Page
 {% endblock %}
@@ -14,4 +73,4 @@ Delete  Page
   <a href="{% url 'tweet_list' %}" class="btn btn-success">Cancel</a>
 </form>
 
-{% endblock %}
+{% endblock %} {% endcomment %}

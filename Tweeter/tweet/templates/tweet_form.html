@@ -1,6 +1,90 @@
 {% extends "layout.html" %}
 
 {% block title %}
+    {% if form.instance.pk %} Edit Tweet {% else %} Create Tweet {% endif %} / Tweeter
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'tweet_list' %}" class="btn btn-link text-decoration-none text-white p-0 me-3 fs-4">
+                ←
+            </a>
+            <h3 class="fw-bold mb-0">
+                {% if form.instance.pk %} Edit Tweet {% else %} Compose New Tweet {% endif %}
+            </h3>
+        </div>
+
+        <div class="card border-0 shadow" style="background-color: #16181c; border: 1px solid #2f3336; border-radius: 20px;">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data" class="custom-tweet-form">
+                    {% csrf_token %}
+                    
+                    <style>
+                        /* Style the Django fields */
+                        .custom-tweet-form p {
+                            margin-bottom: 1.5rem;
+                        }
+                        .custom-tweet-form label {
+                            font-weight: 600;
+                            color: #71767b;
+                            margin-bottom: 8px;
+                            display: block;
+                        }
+                        .custom-tweet-form textarea, 
+                        .custom-tweet-form input[type="text"] {
+                            width: 100%;
+                            padding: 12px;
+                            background: #000 !important;
+                            border: 1px solid #333639;
+                            border-radius: 12px;
+                            color: white !important;
+                        }
+                        .custom-tweet-form input[type="file"] {
+                            color: #71767b;
+                            font-size: 0.9rem;
+                        }
+                        /* Error styling */
+                        .errorlist {
+                            color: #f4212e;
+                            list-style: none;
+                            padding: 0;
+                            font-size: 0.85rem;
+                        }
+                    </style>
+
+                    {{ form.as_p }}
+
+                    <div class="d-flex justify-content-end align-items-center gap-3 mt-4 pt-3 border-top border-secondary border-opacity-25">
+                        <a href="{% url 'tweet_list' %}" class="btn btn-danger   fw-bold  text-secondary fw-bold px-3">
+                            Cancel
+                        </a>
+                        
+                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold">
+                            {% if form.instance.pk %} Update {% else %} Post Tweet {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded-4 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+            <small class="text-primary d-block text-center">
+                ✨ Pro-tip: Keep your tweets short and engaging for more interactions!
+            </small>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% comment %} {% extends "layout.html" %}
+
+{% block title %}
 Tweeter Page
 {% endblock %}
 
@@ -20,4 +104,4 @@ Tweeter Page
       <a href="{% url 'tweet_list' %}">Back</a>
   </button>
 </form> 
-{% endblock %}
+{% endblock %} {% endcomment %}

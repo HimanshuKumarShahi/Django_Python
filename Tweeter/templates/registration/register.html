@@ -1,5 +1,108 @@
 {% extends "layout.html" %}
 
+{% block title %}Join Tweeter{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-6">
+        
+        <div class="p-4 p-md-5 mt-3 shadow-sm" style="background-color: #16181c; border-radius: 24px; border: 1px solid #2f3336;">
+            
+            <div class="mb-5">
+                <h1 class="fw-bold h2 mb-2">Create your account</h1>
+                <p class="text-secondary">Join the conversation and see what's happening.</p>
+            </div>
+
+            <form method="POST" class="custom-form">
+                {% csrf_token %}
+                
+                <style>
+                    /* Cleans up Django's default 'as_p' output */
+                    .custom-form p {
+                        margin-bottom: 1.5rem;
+                        position: relative;
+                    }
+
+                    /* Labels: Clean, bold, and modern */
+                    .custom-form label {
+                        font-weight: 600;
+                        font-size: 0.85rem;
+                        color: #71767b;
+                        margin-bottom: 8px;
+                        display: block;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    /* Inputs: Large touch targets for mobile friendliness */
+                    .custom-form input {
+                        width: 100%;
+                        padding: 14px 16px;
+                        background: transparent !important;
+                        border: 1.5px solid #333639;
+                        border-radius: 12px;
+                        color: #fff !important;
+                        font-size: 1.1rem;
+                        transition: all 0.2s ease;
+                    }
+
+                    /* Interactive Focus State */
+                    .custom-form input:focus {
+                        outline: none;
+                        border-color: #1d9bf0;
+                        background-color: rgba(29, 155, 240, 0.05) !important;
+                    }
+
+                    /* Muting the long Django help text */
+                    .custom-form .helptext {
+                        display: block;
+                        font-size: 0.75rem;
+                        color: #71767b;
+                        margin-top: 6px;
+                        line-height: 1.4;
+                    }
+
+                    /* Validation Errors */
+                    .errorlist {
+                        padding: 0;
+                        list-style: none;
+                        color: #f4212e;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        margin-top: 4px;
+                    }
+                </style>
+
+                {{ form.as_p }}
+
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-success py-3 fs-5 shadow">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-5 pt-4 border-top border-secondary border-opacity-25 text-center">
+                <p class="text-secondary">
+                    Already have an account? 
+                    <a href="{% url 'login' %}" class="text-decoration-none fw-bold ms-1" style="color: #1d9bf0;">
+                        Log in
+                    </a>
+                </p>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+{% endblock %}
+
+
+
+
+{% comment %} {% extends "layout.html" %}
+
 {% block content %}
 <h2>Register  Form</h2>
 <form method='POST'>
@@ -12,4 +115,4 @@
     </div>    
 </form>
 <p>Already have an account? <a href="{% url 'login' %}">Login</a>   </p>
-{% endblock %}
+{% endblock %} {% endcomment %}
