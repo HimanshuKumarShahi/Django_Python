@@ -1,177 +1,164 @@
 {% extends "layout.html" %}
 
-{% block title %}Feed / Tweeter 🤖{% endblock %}
+{% block title %}Feed / Tweeter{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-12 col-lg-7">
-        
+
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4 pt-3 px-2">
-            <h2 class="fw-800 mb-0">Timeline</h2>
+            <h2 class="fw-bold mb-0">Timeline</h2>
             <a class="btn btn-tweet px-4" href="{% url 'tweet_create' %}">
-                <span class="d-none d-sm-inline">Create</span> Tweet
+                Create Tweet
             </a>
         </div>
 
+        <!-- Tweets -->
         <div class="tweet-container">
             {% for tweet in tweets %}
             <div class="tweet-card p-3 border-bottom border-secondary border-opacity-25">
                 <div class="d-flex gap-3">
-                    
-                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" 
-                         style="width: 48px; height: 48px; min-width: 48px;">
+
+                    <!-- Avatar -->
+                    <div class="avatar">
                         {{ tweet.user.username|first|upper }}
                     </div>
 
                     <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-start">
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between">
                             <div>
                                 <span class="fw-bold text-white">{{ tweet.user.username }}</span>
-                                <span class="text-secondary ms-1 small">@{{ tweet.user.username|lower }}</span>
+                                <span class="text-secondary small">@{{ tweet.user.username|lower }}</span>
                             </div>
-                            
+
                             {% if tweet.user == user %}
                             <div class="dropdown">
-                                <button class="btn btn-link text-secondary p-0 border-0" type="button" data-bs-toggle="dropdown">
-                                    <i class="bi bi-three-dots"></i> •••
+                                <button class="btn btn-link text-secondary p-0" data-bs-toggle="dropdown">
+                                    •••
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg border-secondary border-opacity-50">
-                                    <li><a class="dropdown-item" href="{% url 'tweet_edit' tweet.id %}">✏️ Edit</a></li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-danger" href="{% url 'tweet_delete' tweet.id %}">🗑️ Delete</a></li>
+                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'tweet_edit' tweet.id %}">
+                                            ✏️ Edit
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger" href="{% url 'tweet_delete' tweet.id %}">
+                                            🗑️ Delete
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                             {% endif %}
                         </div>
 
-                        <p class="mt-1 mb-3 text-white-50 lh-base">
+                        <!-- Text -->
+                        <p class="mt-2 text-white-50">
                             {{ tweet.text }}
                         </p>
 
+                        <!-- Media -->
                         {% if tweet.photo %}
-                        <div class="tweet-image-wrapper mb-3">
-                            <img src="{{ tweet.photo.url }}" class="tweet-img" alt="Tweet image">
+                        <div class="media-wrapper">
+                            <img src="{{ tweet.photo.url }}" alt="Tweet image">
+                        </div>
+                        {% elif tweet.video %}
+                        <div class="media-wrapper">
+                            <video controls>
+                                <source src="{{ tweet.video.url }}">
+                                Your browser does not support video.
+                            </video>
                         </div>
                         {% endif %}
 
-                        <div class="d-flex justify-content-between align-items-center text-secondary mt-2" style="max-width: 450px;">
-                            
-                            <button class="btn-action hover-blue">
-                                <div class="icon-circle">💬</div>
-                                <span class="small">12</span>
-                            </button>
-
-                            <button class="btn-action hover-green">
-                                <div class="icon-circle">🔁</div>
-                                <span class="small">5</span>
-                            </button>
-
-                            <form action="#" method="POST" class="m-0">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-action hover-red">
-                                    <div class="icon-circle">❤️</div>
-                                    <span class="small">24</span>
-                                </button>
-                            </form>
-
-                            <button class="btn-action hover-blue" onclick="copyUrl()">
-                                <div class="icon-circle">📤</div>
-                            </button>
-
+                        <!-- Actions -->
+                        <div class="actions">
+                            <button class="btn-action hover-blue">💬 12</button>
+                            <button class="btn-action hover-green">🔁 5</button>
+                            <button class="btn-action hover-red">❤️ 24</button>
+                            <button class="btn-action hover-blue" onclick="copyUrl()">📤</button>
                         </div>
+
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="text-center py-5">
-                <div class="display-1 opacity-25 mb-3">📭</div>
-                <h4 class="text-secondary">No tweets yet.</h4>
+            <div class="text-center py-5 text-secondary">
+                <h4>No tweets yet.</h4>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
 
+<!-- Styles -->
 <style>
-    /* Image Handling: Handles any upload size without distortion */
-    .tweet-image-wrapper {
-        width: 100%;
-        max-height: 500px;
-        background-color: #000; /* Backdrop for contain/landscape photos */
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 16px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
+.avatar {
+    width: 48px;
+    height: 48px;
+    background: #1d9bf0;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .tweet-img {
-        max-width: 100%;
-        max-height: 500px;
-        object-fit: contain; /* Keeps the whole image visible */
-        display: block;
-    }
+.media-wrapper {
+    margin-top: 10px;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+}
 
-    /* Interaction Buttons */
-    .btn-action {
-        background: none;
-        border: none;
-        color: #71767b;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 0;
-        transition: color 0.2s ease;
-    }
+.media-wrapper img,
+.media-wrapper video {
+    width: 100%;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+}
 
-    .icon-circle {
-        width: 34px;
-        height: 34px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background 0.2s ease;
-        font-size: 1.1rem;
-    }
+.actions {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    color: #71767b;
+}
 
-    .hover-blue:hover { color: #1d9bf0 !important; }
-    .hover-blue:hover .icon-circle { background: rgba(29, 155, 240, 0.1); }
+.btn-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
-    .hover-green:hover { color: #00ba7c !important; }
-    .hover-green:hover .icon-circle { background: rgba(0, 186, 124, 0.1); }
+.hover-blue:hover { color: #1d9bf0; }
+.hover-green:hover { color: #00ba7c; }
+.hover-red:hover { color: #f91880; }
 
-    .hover-red:hover { color: #f91880 !important; }
-    .hover-red:hover .icon-circle { background: rgba(249, 24, 128, 0.1); }
+.btn-tweet {
+    background: #1d9bf0;
+    color: white;
+    border-radius: 999px;
+    font-weight: 700;
+}
 
-    .tweet-card {
-        transition: background 0.2s;
-        cursor: pointer;
-    }
-    .tweet-card:hover {
-        background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    .btn-tweet {
-        background-color: #1d9bf0;
-        color: white;
-        border-radius: 999px;
-        font-weight: 700;
-    }
-    .btn-tweet:hover {
-        background-color: #1a8cd8;
-        color: white;
-    }
+.btn-tweet:hover {
+    background: #1a8cd8;
+}
 </style>
 
 <script>
-    function copyUrl() {
-        navigator.clipboard.writeText(window.location.href);
-        alert("Link copied to clipboard!");
-    }
+function copyUrl() {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied!");
+}
 </script>
 {% endblock %}
+
 
 
 {% comment %} {% extends "layout.html" %}
