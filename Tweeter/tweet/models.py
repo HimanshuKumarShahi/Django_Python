@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-# Create your models here.
+
 class Tweet(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
     text=models.TextField(max_length=150)
