@@ -12,7 +12,6 @@ class Tweet(models.Model):
     updated_at=models.DateTimeField(auto_now=True)
     
     def clean(self):
-        # Either image or video, not both, not none
         if self.photo and self.video:
             raise ValidationError("Upload either an image or a video, not both.")
         if not self.photo and not self.video:
