@@ -1,138 +1,147 @@
 {% extends "layout.html" %}
-
 {% block title %}Feed / Tweeter{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-12 col-lg-7">
+  <div class="col-12 col-lg-7">
 
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4 pt-3 px-2">
-            <h2 class="fw-bold mb-0">Timeline</h2>
-            <a class="btn btn-tweet px-4" href="{% url 'tweet_create' %}">
-                Create Tweet
-            </a>
-        </div>
-
-        <!-- Tweets -->
-        <div class="tweet-container">
-            {% for tweet in tweets %}
-            <div class="tweet-card p-3 border-bottom border-secondary border-opacity-25">
-                <div class="d-flex gap-3">
-
-                    <!-- Avatar -->
-                    <div class="avatar">
-                        {{ tweet.user.username|first|upper }}
-                    </div>
-
-                    <div class="w-100">
-                        <!-- Header -->
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="fw-bold text-white">{{ tweet.user.username }}</span>
-                                <span class="text-secondary small">@{{ tweet.user.username|lower }}</span>
-                            </div>
-
-                            {% if tweet.user == user %}
-                            <div class="dropdown">
-                                <button class="btn btn-link text-secondary p-0" data-bs-toggle="dropdown">
-                                    •••
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'tweet_edit' tweet.id %}">
-                                            ✏️ Edit
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item text-danger" href="{% url 'tweet_delete' tweet.id %}">
-                                            🗑️ Delete
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Text -->
-                        <p class="mt-2 text-white-50">
-                            {{ tweet.text }}
-                        </p>
-
-                        <!-- Media -->
-                        {% if tweet.photo %}
-                        <div class="media-wrapper">
-                            <img src="{{ tweet.photo.url }}" alt="Tweet image">
-                        </div>
-                        {% elif tweet.video %}
-                        <div class="media-wrapper">
-                            <video controls>
-                                <source src="{{ tweet.video.url }}">
-                                Your browser does not support video.
-                            </video>
-                        </div>
-                        {% endif %}
-
-                        <!-- Actions -->
-                        <div class="actions">
-                            <button class="btn-action hover-blue">💬 12</button>
-                            <button class="btn-action hover-green">🔁 5</button>
-                            <button class="btn-action hover-red">❤️ 24</button>
-                            <button class="btn-action hover-blue" onclick="copyUrl()">📤</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="text-center py-5 text-secondary">
-                <h4>No tweets yet.</h4>
-            </div>
-            {% endfor %}
-        </div>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center py-3 border-bottom border-secondary border-opacity-25">
+      <h2 class="fw-bold text-white mb-0">Timeline</h2>
+      <a href="{% url 'tweet_create' %}" class="btn btn-tweet px-4">
+        Create Tweet
+      </a>
     </div>
+
+    <!-- Feed -->
+    {% for tweet in tweets %}
+    <div class="tweet-card px-3 py-4 border-bottom border-secondary border-opacity-25">
+
+      <!-- TOP ROW -->
+      <div class="d-flex justify-content-between align-items-start">
+
+        <!-- LEFT -->
+        <div class="d-flex gap-3">
+
+          <!-- Avatar -->
+          <div class="avatar">
+            {{ tweet.user.username|first|upper }}
+          </div>
+
+          <!-- User + Time -->
+          <div>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+              <span class="fw-bold text-white">
+                {{ tweet.user.username }}
+              </span>
+
+              <span class="text-secondary small">
+                @{{ tweet.user.username|lower }}
+              </span>
+
+              <span class="text-secondary small">
+                · {{ tweet.created_at|date:"M d, Y · H:i" }}
+                {% if tweet.updated_at > tweet.created_at %}
+                  · <span class="fst-italic">Edited</span>
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        {% if tweet.user == user %}
+        <div class="dropdown">
+          <button class="btn btn-link text-secondary p-0 fs-5" data-bs-toggle="dropdown">
+            ⋯
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+            <li>
+              <a class="dropdown-item" href="{% url 'tweet_edit' tweet.id %}">
+                ✏️ Edit
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item text-danger" href="{% url 'tweet_delete' tweet.id %}">
+                🗑️ Delete
+              </a>
+            </li>
+          </ul>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <!-- TEXT -->
+      <p class="mt-3 mb-3 text-white-50 lh-base">
+        {{ tweet.text }}
+      </p>
+
+      <!-- MEDIA -->
+      {% if tweet.photo %}
+      <div class="media-wrapper mb-3">
+        <img src="{{ tweet.photo.url }}" alt="Tweet image">
+      </div>
+      {% elif tweet.video %}
+      <div class="media-wrapper mb-3">
+        <video controls>
+          <source src="{{ tweet.video.url }}">
+        </video>
+      </div>
+      {% endif %}
+
+    </div>
+    {% empty %}
+    <div class="text-center py-5 text-secondary">
+      <div class="display-6">📭</div>
+      <p>No tweets yet</p>
+    </div>
+    {% endfor %}
+
+  </div>
 </div>
 
-<!-- Styles -->
 <style>
 .avatar {
-    width: 48px;
-    height: 48px;
-    background: #1d9bf0;
-    border-radius: 50%;
-    color: white;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: #1d9bf0;
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tweet-card:hover {
+  background: rgba(255,255,255,0.03);
 }
 
 .media-wrapper {
-    margin-top: 10px;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #000;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .media-wrapper img,
 .media-wrapper video {
-    width: 100%;
-    max-height: 500px;
-    object-fit: contain;
-    display: block;
+  width: 100%;
+  max-height: 500px;
+  object-fit: contain;
 }
 
 .actions {
-    display: flex;
-    gap: 18px;
-    margin-top: 12px;
-    color: #71767b;
+  display: flex;
+  gap: 22px;
+  color: #71767b;
 }
 
 .btn-action {
-    background: none;
-    border: none;
-    cursor: pointer;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
 }
 
 .hover-blue:hover { color: #1d9bf0; }
@@ -140,24 +149,24 @@
 .hover-red:hover { color: #f91880; }
 
 .btn-tweet {
-    background: #1d9bf0;
-    color: white;
-    border-radius: 999px;
-    font-weight: 700;
+  background: #1d9bf0;
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
 }
-
 .btn-tweet:hover {
-    background: #1a8cd8;
+  background: #1a8cd8;
 }
 </style>
 
 <script>
 function copyUrl() {
-    navigator.clipboard.writeText(window.location.href);
-    alert("Link copied!");
+  navigator.clipboard.writeText(window.location.href);
+  alert("Link copied!");
 }
 </script>
 {% endblock %}
+
 
 
 
