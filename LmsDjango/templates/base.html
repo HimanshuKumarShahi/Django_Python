@@ -1,8 +1,27 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}LMS{% endblock %}</title>
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
 
-{% block title %}My Website{% endblock %}
+<body>
 
+<nav>
+    <a href="/">Home</a>
+    <a href="/courses/">Courses</a>
+    <a href="/login/">Login</a>
+</nav>
+
+<div class="container">
 {% block content %}
-  <h1>Welcome to my website!</h1>
-  <p>This is a child template.</p>
 {% endblock %}
+</div>
+
+<footer>
+<p>© 2026 LMS</p>
+</footer>
+
+</body>
+</html>
