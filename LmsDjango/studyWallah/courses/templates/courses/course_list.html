@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6 text-center">
+    <h1 class="text-3xl font-bold text-slate-900 mb-6">Available Courses</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for course in courses %}
+        <div class="bg-white border rounded-xl p-4 shadow-sm">
+            <h2 class="text-xl font-semibold">{{ course.title }}</h2>
+            <p class="text-slate-500 mt-2">{{ course.description|truncatewords:20 }}</p>
+            <a href="{% url 'course_detail' course.id %}" class="inline-block mt-4 text-indigo-600 font-bold">
+                Start Learning →
+            </a>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-12 bg-slate-100 rounded-xl">
+            <p class="text-slate-500 italic">No courses available yet. Check back soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
