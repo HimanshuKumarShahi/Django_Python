@@ -18,14 +18,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.views.generic import RedirectView 
 
 urlpatterns = [
+    # 1. Tailwind Browser Reload (Development only)
     path("__reload__/", include("django_browser_reload.urls")),
     
-    path("", include('courses.urls')),
-
+    # 2. Admin Panel
     path('admin/', admin.site.urls),
+
+    # 3. Account App (Login, Register, Settings)
     path('account/', include('account.urls')),
-    
+
+    # 4. Courses App (This is your main dashboard/home now)
+    path('', include('courses.urls')), 
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,7 +9,8 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('dashboard') 
+            # Redirect to course_list (the home page for students)
+            return redirect('course_list') 
     else:
         form = CustomUserCreationForm()
     return render(request, 'account/register.html', {'form': form})
@@ -20,7 +21,10 @@ def profile_settings(request):
         form = UserProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('profile')
+            # Redirect back to settings to show updated data
+            return redirect('settings')
     else:
         form = UserProfileForm(instance=request.user)
+    
+    # FIX: This should render the settings template, NOT course_list
     return render(request, 'account/settings.html', {'form': form})

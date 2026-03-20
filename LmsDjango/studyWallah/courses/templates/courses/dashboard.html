@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto w-full px-4 py-10">
+    <div class="flex items-center justify-between mb-10">
+        <h1 class="text-4xl font-black text-slate-900 tracking-tight">My Learning <span class="text-indigo-600">Dashboard</span></h1>
+        <p class="text-slate-500 font-medium">You are enrolled in {{ courses.count }} courses</p>
+    </div>
+
+    {% if courses %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for course in courses %}
+        <div class="bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <div class="relative aspect-video">
+                <img src="{{ course.thumbnail.url }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <span class="absolute bottom-4 left-4 bg-indigo-600 text-white text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">Enrolled</span>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-slate-900 mb-2">{{ course.title }}</h3>
+                <p class="text-slate-500 text-sm line-clamp-2 mb-6">{{ course.description }}</p>
+                <a href="{% url 'course_detail' course.id %}" class="block text-center bg-slate-900 hover:bg-indigo-600 text-white font-bold py-3 rounded-xl transition-colors">
+                    Resume Learning
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-indigo-50 border-2 border-dashed border-indigo-200 rounded-3xl p-20 text-center">
+        <h2 class="text-2xl font-bold text-indigo-900 mb-2">Start your journey today!</h2>
+        <p class="text-indigo-600 mb-6">You haven't enrolled in any courses yet.</p>
+        <a href="{% url 'course_list' %}" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200">Browse All Courses</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
