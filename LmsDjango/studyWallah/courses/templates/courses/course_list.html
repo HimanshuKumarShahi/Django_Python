@@ -1,21 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto p-6 text-center">
-    <h1 class="text-3xl font-bold text-slate-900 mb-6">Available Courses</h1>
-    
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="max-w-7xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-slate-900 mb-10">Explore Courses</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {% for course in courses %}
-        <div class="bg-white border rounded-xl p-4 shadow-sm">
-            <h2 class="text-xl font-semibold">{{ course.title }}</h2>
-            <p class="text-slate-500 mt-2">{{ course.description|truncatewords:20 }}</p>
-            <a href="{% url 'course_detail' course.id %}" class="inline-block mt-4 text-indigo-600 font-bold">
-                Start Learning →
-            </a>
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition-all group">
+            {% if course.thumbnail %}
+            <img src="{{ course.thumbnail.url }}" class="w-full h-48 object-cover">
+            {% endif %}
+            
+            <div class="p-6">
+                <h3 class="text-xl font-bold text-slate-900">{{ course.title }}</h3>
+                <p class="text-slate-500 text-sm mt-2 mb-6 line-clamp-2">{{ course.description }}</p>
+                
+                <div class="flex items-center justify-between">
+                    {% if user.is_authenticated %}
+                        {% if user in course.students.all %}
+                            <a href="{% url 'course_detail' course.id %}" class="text-indigo-600 font-bold hover:underline">
+                                Continue →
+                            </a>
+                        {% else %}
+                            <a href="{% url 'enroll_course' course.id %}" class="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-indigo-700 transition">
+                                Enroll Now
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="bg-slate-100 text-slate-600 px-6 py-2 rounded-xl font-bold">Log in to Enroll</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         {% empty %}
-        <div class="col-span-full py-12 bg-slate-100 rounded-xl">
-            <p class="text-slate-500 italic">No courses available yet. Check back soon!</p>
+        <div class="col-span-full py-20 text-center bg-slate-100 rounded-3xl">
+            <p class="text-slate-400 font-medium italic">No courses found matching your search.</p>
         </div>
         {% endfor %}
     </div>
