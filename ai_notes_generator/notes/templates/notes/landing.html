@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% block title %}AI Notes — Turn Lectures into Smart Notes{% endblock %}
+
+{% block extra_head %}
+<style>
+.hero { padding: 90px 0 70px; text-align: center; }
+.hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 99px; padding: 6px 16px; font-size: 13px; font-weight: 600;
+    color: var(--accent3); margin-bottom: 28px;
+}
+.hero-tag span { width: 6px; height: 6px; background: #10b981; border-radius: 50%;
+    animation: ping 1.5s ease-in-out infinite; }
+@keyframes ping { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.5)} }
+
+.hero h1 {
+    font-size: clamp(36px, 6vw, 72px); font-weight: 900; line-height: 1.1;
+    margin-bottom: 24px; letter-spacing: -2px;
+}
+.hero h1 .line1 { display: block; color: var(--text); }
+.hero h1 .line2 {
+    display: block;
+    background: linear-gradient(135deg, #6366f1 0%, #a78bfa 50%, #ec4899 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero p { font-size: 18px; color: var(--text2); max-width: 560px; margin: 0 auto 40px;
+    line-height: 1.7; font-weight: 400; }
+
+.hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-hero-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; border: none; border-radius: 14px;
+    padding: 15px 32px; font-size: 16px; font-weight: 700;
+    cursor: pointer; text-decoration: none; font-family: 'Inter',sans-serif;
+    box-shadow: 0 4px 24px rgba(99,102,241,0.45);
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 36px rgba(99,102,241,0.6); }
+.btn-hero-secondary {
+    background: rgba(255,255,255,0.04); color: var(--text2);
+    border: 1px solid var(--border); border-radius: 14px;
+    padding: 15px 32px; font-size: 16px; font-weight: 600;
+    cursor: pointer; text-decoration: none; font-family: 'Inter',sans-serif;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-hero-secondary:hover { border-color: rgba(99,102,241,0.4); color: var(--text); background: rgba(99,102,241,0.06); }
+
+/* Fake UI Preview */
+.hero-preview {
+    margin: 60px auto 0; max-width: 860px;
+    background: var(--bg3); border: 1px solid var(--glass-b);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1);
+}
+.preview-bar {
+    background: rgba(255,255,255,0.03); padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+}
+.preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.preview-body { padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.preview-card {
+    background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 12px; padding: 18px;
+}
+.preview-card .pc-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.preview-card .pc-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.preview-line { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.06); margin-bottom: 6px; }
+
+/* Features grid */
+.features { padding: 80px 0; }
+.section-header { text-align: center; margin-bottom: 56px; }
+.section-header h2 { font-size: 40px; font-weight: 800; margin-bottom: 12px; }
+.section-header p { color: var(--text2); font-size: 17px; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.feature-card {
+    background: var(--glass); border: 1px solid var(--glass-b);
+    border-radius: 20px; padding: 28px;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+}
+.feature-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(99,102,241,0.08), transparent 60%);
+    opacity: 0; transition: opacity 0.3s;
+}
+.feature-card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.3); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon { font-size: 32px; margin-bottom: 16px; }
+.feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.feature-card p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+/* How it works */
+.how { padding: 80px 0; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; position: relative; }
+.steps::before {
+    content: ''; position: absolute; top: 28px; left: calc(16% + 28px);
+    width: calc(68% - 56px); height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0.3;
+}
+.step { text-align: center; padding: 32px 24px; }
+.step-num {
+    width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 20px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+    border: 1px solid rgba(99,102,241,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+}
+.step h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.step p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+/* Stats */
+.stats-bar {
+    background: var(--bg3); border: 1px solid var(--glass-b);
+    border-radius: 20px; padding: 36px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center;
+}
+.stat-val { font-size: 36px; font-weight: 900; background: linear-gradient(135deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom: 4px; }
+.stat-lbl { font-size: 13px; color: var(--text2); }
+
+/* CTA */
+.cta-section { padding: 80px 0; text-align: center; }
+.cta-card {
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 28px; padding: 60px 40px; max-width: 700px; margin: 0 auto;
+    position: relative; overflow: hidden;
+}
+.cta-card::before {
+    content:''; position:absolute; width:300px; height:300px;
+    background: radial-gradient(circle, rgba(99,102,241,0.2), transparent 70%);
+    top:-100px; right:-80px; border-radius:50%;
+}
+.cta-card h2 { font-size: 38px; font-weight: 900; margin-bottom: 14px; }
+.cta-card p { font-size: 16px; color: var(--text2); margin-bottom: 32px; }
+
+@media(max-width:768px) {
+    .steps { grid-template-columns:1fr; }
+    .steps::before { display:none; }
+    .stats-bar { grid-template-columns: repeat(2,1fr); }
+    .preview-body { grid-template-columns:1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-tag"><span></span> Powered by Gemini AI</div>
+        <h1>
+            <span class="line1">Turn Any Lecture Into</span>
+            <span class="line2">Smart AI Notes</span>
+        </h1>
+        <p>Upload your audio or video lecture. Our AI analyzes it and generates structured notes, concept maps, diagrams, and a beautiful downloadable PDF — in minutes.</p>
+        <div class="hero-cta">
+            <a href="{% url 'register' %}" class="btn-hero-primary">🚀 Start for Free</a>
+            <a href="{% url 'login' %}" class="btn-hero-secondary">Sign In →</a>
+        </div>
+
+        <!-- Fake UI Preview -->
+        <div class="hero-preview">
+            <div class="preview-bar">
+                <div class="preview-dot" style="background:#ef4444;"></div>
+                <div class="preview-dot" style="background:#f59e0b;"></div>
+                <div class="preview-dot" style="background:#10b981;"></div>
+                <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:6px;height:22px;margin-left:10px;"></div>
+            </div>
+            <div class="preview-body">
+                <div class="preview-card">
+                    <div class="pc-label">📝 Lecture Notes</div>
+                    <div class="pc-title">Machine Learning — Lecture 3</div>
+                    <div class="preview-line" style="width:90%;"></div>
+                    <div class="preview-line" style="width:75%;"></div>
+                    <div class="preview-line" style="width:85%;"></div>
+                    <div class="preview-line" style="width:60%;margin-top:10px;"></div>
+                    <div class="preview-line" style="width:80%;"></div>
+                </div>
+                <div class="preview-card">
+                    <div class="pc-label">🗺️ Concept Map</div>
+                    <div style="height:80px;display:flex;align-items:center;justify-content:center;">
+                        <svg width="160" height="70" viewBox="0 0 160 70">
+                            <circle cx="80" cy="35" r="18" fill="rgba(99,102,241,0.3)" stroke="#6366f1" stroke-width="1.5"/>
+                            <circle cx="24" cy="20" r="12" fill="rgba(139,92,246,0.2)" stroke="#8b5cf6" stroke-width="1"/>
+                            <circle cx="136" cy="20" r="12" fill="rgba(139,92,246,0.2)" stroke="#8b5cf6" stroke-width="1"/>
+                            <circle cx="24" cy="52" r="10" fill="rgba(167,139,250,0.15)" stroke="#a78bfa" stroke-width="1"/>
+                            <circle cx="136" cy="52" r="10" fill="rgba(167,139,250,0.15)" stroke="#a78bfa" stroke-width="1"/>
+                            <line x1="62" y1="28" x2="36" y2="22" stroke="#6366f1" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+                            <line x1="98" y1="28" x2="124" y2="22" stroke="#6366f1" stroke-width="1" stroke-dasharray="3,2" opacity="0.6"/>
+                            <line x1="65" y1="40" x2="34" y2="50" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+                            <line x1="95" y1="40" x2="126" y2="50" stroke="#8b5cf6" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+                            <text x="80" y="39" text-anchor="middle" fill="#e2e8f0" font-size="7" font-weight="bold">AI/ML</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="preview-card">
+                    <div class="pc-label">🧩 Key Concepts</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="width:6px;height:6px;border-radius:50%;background:#ef4444;flex-shrink:0;"></div>
+                            <div class="preview-line" style="flex:1;margin:0;height:8px;"></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0;"></div>
+                            <div class="preview-line" style="flex:1;margin:0;height:8px;width:70%;"></div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <div style="width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0;"></div>
+                            <div class="preview-line" style="flex:1;margin:0;height:8px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-card" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;">
+                    <div style="font-size:28px;">📄</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text);">Download PDF</div>
+                    <div style="font-size:11px;color:var(--text3);">Cover + TOC + Notes + Diagrams</div>
+                    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;">Download →</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS -->
+<section style="padding: 0 0 60px;">
+    <div class="container">
+        <div class="stats-bar">
+            <div><div class="stat-val">2.5</div><div class="stat-lbl">Gemini Flash Model</div></div>
+            <div><div class="stat-val">50MB</div><div class="stat-lbl">Max Upload Size</div></div>
+            <div><div class="stat-val">6</div><div class="stat-lbl">Output Types</div></div>
+            <div><div class="stat-val">100%</div><div class="stat-lbl">Free to Use</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Everything you need to <span class="text-gradient">understand faster</span></h2>
+            <p>AI does the heavy lifting so you can focus on learning</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Structured Markdown Notes</h3>
+                <p>Complete lecture notes with headings, bullet points, and key highlights — automatically organized and formatted.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🗺️</div>
+                <h3>Interactive Concept Maps</h3>
+                <p>Mermaid.js diagrams showing how concepts connect. Visualize the entire lecture structure at a glance.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Relationship Graphs</h3>
+                <p>Network graphs showing topic relationships generated with matplotlib — perfect for understanding complex subjects.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📄</div>
+                <h3>Beautiful PDF Export</h3>
+                <p>Branded, multi-page PDFs with cover page, table of contents, notes, concept graphs, and quiz questions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">❓</div>
+                <h3>AI Quiz Questions</h3>
+                <p>Auto-generated questions and answers to test your knowledge and reinforce learning from each lecture.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Re-evaluate Anytime</h3>
+                <p>Not satisfied? Click re-evaluate to have AI improve and expand your existing notes using the fast model.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+    <div class="container">
+        <div class="section-header">
+            <h2>How it <span class="text-gradient">works</span></h2>
+            <p>Three steps from upload to insights</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">⬆️</div>
+                <h3>Upload</h3>
+                <p>Drag and drop any audio (MP3, WAV, M4A) or video (MP4, WebM) file up to 50MB. We validate and compress automatically.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">🤖</div>
+                <h3>AI Processes</h3>
+                <p>Gemini 2.5 Flash analyzes your lecture using Celery background workers. You'll see live status updates on your dashboard.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">✨</div>
+                <h3>Get Results</h3>
+                <p>View structured notes, concept maps, and diagrams right in your browser — or download the beautiful PDF.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <h2>Ready to study <span class="text-gradient">smarter?</span></h2>
+            <p>Create your free account and start generating AI notes from your lectures today.</p>
+            <a href="{% url 'register' %}" class="btn-hero-primary">🚀 Create Free Account</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
