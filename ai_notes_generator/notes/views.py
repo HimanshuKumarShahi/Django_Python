@@ -92,10 +92,10 @@ def note_detail(request, pk):
 @login_required
 def download_pdf(request, pk):
     lecture = get_object_or_404(LectureUpload, pk=pk, user=request.user)
-    if not hasattr(lecture, 'notes') or not lecture.notes.pdf_url:
+    if not hasattr(lecture, 'notes') or not lecture.notes.pdf_file:
         messages.error(request, "PDF is not available yet.")
         return redirect('dashboard')
-    return redirect(lecture.notes.pdf_url)
+    return redirect(lecture.notes.pdf_file.url)
 
 
 @login_required
