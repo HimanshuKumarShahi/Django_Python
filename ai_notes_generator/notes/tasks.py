@@ -372,12 +372,10 @@ def process_media_and_generate_notes(self, lecture_id: int):
         # ── 2. Init Gemini client ──────────────────────────────
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-        # ── 3. Download media from Cloudinary ─────────────────
-        media_url  = lecture.media_file.url
+        # ── 3. Read media from local disk ──────────────────────
+        local_media = lecture.media_file.path
         mime_type  = get_mime_type(str(lecture.media_file), lecture.file_type)
-        suffix     = '.' + mime_type.split('/')[-1].replace('mpeg', 'mp3')
-        local_media = download_to_temp(media_url, suffix=suffix)
-        logger.info(f"Downloaded media: {os.path.getsize(local_media)} bytes")
+        logger.info(f"Using local media: {os.path.getsize(local_media)} bytes")
 
         # ── 4. Upload to Gemini File API ──────────────────────
         gemini_file = client.files.upload(
@@ -387,7 +385,7 @@ def process_media_and_generate_notes(self, lecture_id: int):
                 display_name=lecture.title[:100],
             )
         )
-        safe_delete(local_media); local_media = None
+        # local_media is the actual DB file path, so we do NOT delete it!
 
         # Poll until ACTIVE
         for _ in range(24):  # max 2 minutes
@@ -469,22 +467,18 @@ Rules:
 
         # ── 8. Generate concept graph (local, no API) ─────────
         rels = data.get('topic_relationships', [])
-        graph_url = None
+        from django.core.files import File
+        
+        graph_path = None
         if rels:
             graph_path = generate_concept_graph(rels, lecture.title)
-            g_result = cloudinary.uploader.upload(
-                graph_path, folder='AI_notes/graphs', resource_type='image')
-            graph_url = g_result['secure_url']
 
         # ── 9. Generate PDF ────────────────────────────────────
         pdf_path = generate_pdf(data, graph_path, lecture.title)
-        p_result = cloudinary.uploader.upload(
-            pdf_path, folder='AI_notes/pdfs', resource_type='image')
-        pdf_url = p_result['secure_url']
 
         # ── 10. Save to DB ─────────────────────────────────────
         elapsed = round(time.time() - start, 2)
-        GeneratedNote.objects.update_or_create(
+        note, created = GeneratedNote.objects.update_or_create(
             lecture=lecture,
             defaults={
                 'summary_text':           data.get('summary', ''),
@@ -494,12 +488,22 @@ Rules:
                 'skeleton_outline_json':  data.get('skeleton_outline', []),
                 'topic_relationships_json': data.get('topic_relationships', []),
                 'quiz_questions_json':    data.get('quiz_questions', []),
-                'concept_graph_url':      graph_url or '',
-                'pdf_url':                pdf_url,
                 'ai_model_used':          settings.GEMINI_MULTIMODAL_MODEL,
                 'processing_time_seconds': elapsed,
             }
         )
+
+        if graph_path and os.path.exists(graph_path):
+            with open(graph_path, 'rb') as f:
+                note.concept_graph_file.save(os.path.basename(graph_path), File(f), save=False)
+        
+        if pdf_path and os.path.exists(pdf_path):
+            with open(pdf_path, 'rb') as f:
+                note.pdf_file.save(os.path.basename(pdf_path), File(f), save=False)
+
+        note.save()
+
+
 
         lecture.is_processed = True
         lecture.processing_status = 'DONE'
@@ -597,11 +601,8 @@ Improve and expand on the existing content. Provide 10-15 concepts, 8-10 quiz qu
         graph_path = pdf_path = None
         try:
             rels = data.get('topic_relationships', [])
-            graph_url = note.concept_graph_url
             if rels:
                 graph_path = generate_concept_graph(rels, lecture.title)
-                g = cloudinary.uploader.upload(graph_path, folder='AI_notes/graphs', resource_type='image')
-                graph_url = g['secure_url']
 
             merged_data = {
                 'summary': note.summary_text,
@@ -614,16 +615,15 @@ Improve and expand on the existing content. Provide 10-15 concepts, 8-10 quiz qu
                 'model': settings.GEMINI_TEXT_FAST_MODEL,
             }
             pdf_path = generate_pdf(merged_data, graph_path, lecture.title)
-            p = cloudinary.uploader.upload(pdf_path, folder='AI_notes/pdfs', resource_type='image')
-            pdf_url = p['secure_url']
+            from django.core.files import File
 
-            note.key_concepts_json       = merged_data['key_concepts']
-            note.mermaid_diagram         = merged_data['mermaid_diagram']
-            note.skeleton_outline_json   = merged_data['skeleton_outline']
-            note.topic_relationships_json = merged_data['topic_relationships']
-            note.quiz_questions_json     = merged_data['quiz_questions']
-            note.concept_graph_url       = graph_url
-            note.pdf_url                 = pdf_url
+            if graph_path and os.path.exists(graph_path):
+                with open(graph_path, 'rb') as f:
+                    note.concept_graph_file.save(os.path.basename(graph_path), File(f), save=False)
+            
+            if pdf_path and os.path.exists(pdf_path):
+                with open(pdf_path, 'rb') as f:
+                    note.pdf_file.save(os.path.basename(pdf_path), File(f), save=False)
             note.ai_model_used           = settings.GEMINI_TEXT_FAST_MODEL
             note.processing_time_seconds = round(time.time() - start, 2)
             note.save()
