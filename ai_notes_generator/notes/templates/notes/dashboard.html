@@ -1,72 +1,230 @@
 {% extends 'base.html' %}
+{% block title %}Dashboard — AI Notes{% endblock %}
+
+{% block extra_head %}
+<style>
+.dash-page { padding: 40px 0 60px; }
+.dash-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+.dash-header h1 { font-size:28px; font-weight:800; }
+.dash-header p { color:var(--text2); font-size:14px; margin-top:4px; }
+
+/* Stats */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:36px; }
+.stat-card { background:var(--glass); border:1px solid var(--glass-b); border-radius:16px; padding:20px 24px; }
+.stat-card .sc-val { font-size:32px; font-weight:900; line-height:1; margin-bottom:4px; }
+.stat-card .sc-lbl { font-size:12px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; }
+.sc-total .sc-val { background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.sc-done  .sc-val { color:#10b981; }
+.sc-proc  .sc-val { color:#6366f1; }
+.sc-fail  .sc-val { color:#ef4444; }
+
+/* Toolbar */
+.toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:16px; }
+.search-box { position:relative; flex:1; max-width:320px; }
+.search-box input { width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--border);
+    border-radius:10px; padding:10px 16px 10px 40px; color:var(--text); font-size:13px;
+    font-family:'Inter',sans-serif; outline:none; }
+.search-box input:focus { border-color:rgba(99,102,241,0.4); }
+.search-box::before { content:'🔍'; position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:14px; }
+
+/* Lecture grid */
+.lecture-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+.lecture-card {
+    background:var(--glass); border:1px solid var(--glass-b); border-radius:20px; padding:22px;
+    display:flex; flex-direction:column; gap:14px;
+    transition:all 0.25s; position:relative; overflow:hidden;
+}
+.lecture-card::before { content:''; position:absolute; inset:0;
+    background:radial-gradient(circle at top left, rgba(99,102,241,0.06), transparent 60%);
+    opacity:0; transition:opacity 0.3s; pointer-events:none; }
+.lecture-card:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,0.3); }
+.lecture-card:hover::before { opacity:1; }
+
+.lc-header { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; }
+.lc-title { font-size:15px; font-weight:700; line-height:1.4; color:var(--text);
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.lc-meta { display:flex; align-items:center; gap:14px; font-size:12px; color:var(--text3); }
+.lc-meta span { display:flex; align-items:center; gap:5px; }
+
+.lc-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:auto; }
+.lc-actions .btn { font-size:12px; padding:7px 13px; border-radius:8px; }
+
+/* Error message */
+.error-msg { font-size:12px; color:#fca5a5; padding:8px 12px; background:rgba(239,68,68,0.08);
+    border:1px solid rgba(239,68,68,0.2); border-radius:8px; }
+
+/* Empty state */
+.empty-state { grid-column:1/-1; text-align:center; padding:80px 20px; }
+.empty-state .es-icon { font-size:64px; margin-bottom:16px; opacity:0.4; }
+.empty-state h3 { font-size:20px; font-weight:700; margin-bottom:8px; color:var(--text); }
+.empty-state p { color:var(--text2); margin-bottom:24px; }
+
+/* Processing pulse */
+.card-processing { border-color:rgba(99,102,241,0.4) !important; animation:card-glow 2s ease-in-out infinite; }
+@keyframes card-glow { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 20px rgba(99,102,241,0.2)} }
+
+@media(max-width:768px) { .stats-row{grid-template-columns:repeat(2,1fr);} }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto mt-10 px-4">
-    
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-extrabold text-gray-900">My Lectures</h1>
-            <p class="text-gray-500 text-sm mt-1">Manage your uploaded media and view AI generated notes.</p>
+<div class="dash-page">
+    <div class="container">
+
+        <div class="dash-header">
+            <div>
+                <h1>📊 My Lectures</h1>
+                <p>Manage your uploaded media and AI-generated notes</p>
+            </div>
+            <a href="{% url 'upload' %}" class="btn btn-primary">⬆️ Upload New</a>
         </div>
-        <a href="{% url 'upload' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-colors flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Upload New
-        </a>
-    </div>
 
-    {% if lectures %}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for lecture in lectures %}
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-            <div class="p-5">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 line-clamp-2">{{ lecture.title }}</h3>
-                    
-                    {% if lecture.is_processed %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Completed
-                        </span>
-                    {% else %}
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 animate-pulse">
-                            Processing...
-                        </span>
-                    {% endif %}
-                </div>
-                
-                <div class="text-sm text-gray-500 mb-4">
-                    <p>Uploaded: {{ lecture.uploaded_at|date:"M d, Y" }}</p>
-                </div>
-
-                {% if lecture.is_processed %}
-                    <a href="#" class="block w-full text-center bg-gray-50 hover:bg-gray-100 text-gray-900 font-semibold py-2 px-4 border border-gray-300 rounded-lg transition-colors">
-                        View AI Notes
-                    </a>
-                {% else %}
-                    <button disabled class="w-full text-center bg-gray-100 text-gray-400 font-semibold py-2 px-4 rounded-lg cursor-not-allowed">
-                        Generating...
-                    </button>
-                {% endif %}
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card sc-total">
+                <div class="sc-val">{{ stats.total }}</div>
+                <div class="sc-lbl">Total Lectures</div>
+            </div>
+            <div class="stat-card sc-done">
+                <div class="sc-val">{{ stats.done }}</div>
+                <div class="sc-lbl">Completed</div>
+            </div>
+            <div class="stat-card sc-proc">
+                <div class="sc-val">{{ stats.processing }}</div>
+                <div class="sc-lbl">Processing</div>
+            </div>
+            <div class="stat-card sc-fail">
+                <div class="sc-val">{{ stats.failed }}</div>
+                <div class="sc-lbl">Failed</div>
             </div>
         </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    
-    <div class="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-200">
-        <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-        <h3 class="text-lg font-medium text-gray-900">No lectures uploaded yet</h3>
-        <p class="mt-1 text-sm text-gray-500">Get started by uploading your first audio or video class.</p>
-        <div class="mt-6">
-            <a href="{% url 'upload' %}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                Upload Lecture
-            </a>
-        </div>
-    </div>
-    {% endif %}
 
+        <!-- Toolbar -->
+        {% if lectures %}
+        <div class="toolbar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search lectures...">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Lecture Grid -->
+        <div class="lecture-grid" id="lectureGrid">
+            {% for lecture in lectures %}
+            <div class="lecture-card {% if lecture.processing_status == 'PROCESSING' or lecture.processing_status == 'PENDING' %}card-processing{% endif %}"
+                 id="card-{{ lecture.pk }}"
+                 data-title="{{ lecture.title|lower }}"
+                 data-status="{{ lecture.processing_status }}">
+
+                <div class="lc-header">
+                    <div class="lc-title">{{ lecture.title }}</div>
+                    <div style="flex-shrink:0;">
+                        {% if lecture.processing_status == 'DONE' %}
+                            <span class="badge badge-done">✅ Done</span>
+                        {% elif lecture.processing_status == 'PROCESSING' %}
+                            <span class="badge badge-processing">⚡ Processing</span>
+                        {% elif lecture.processing_status == 'PENDING' %}
+                            <span class="badge badge-pending">⏳ Queued</span>
+                        {% elif lecture.processing_status == 'FAILED' %}
+                            <span class="badge badge-failed">❌ Failed</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="lc-meta">
+                    <span>
+                        {% if lecture.file_type == 'audio' %}🎵{% else %}🎬{% endif %}
+                        {{ lecture.file_type|capfirst }}
+                    </span>
+                    <span>📅 {{ lecture.uploaded_at|date:"M d, Y" }}</span>
+                </div>
+
+                {% if lecture.processing_status == 'FAILED' and lecture.error_message %}
+                <div class="error-msg">{{ lecture.error_message|truncatechars:80 }}</div>
+                {% endif %}
+
+                <div class="lc-actions">
+                    {% if lecture.processing_status == 'DONE' %}
+                        <a href="{% url 'note_detail' lecture.pk %}" class="btn btn-primary">📖 View Notes</a>
+                        <a href="{% url 'download_pdf' lecture.pk %}" class="btn btn-ghost" target="_blank">📄 PDF</a>
+                        <form method="POST" action="{% url 're_evaluate' lecture.pk %}" style="display:inline-block; margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-ghost">🔄</button>
+                        </form>
+                    {% elif lecture.processing_status == 'FAILED' %}
+                        <form method="POST" action="{% url 'retry_lecture' lecture.pk %}" style="display:inline-block; margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-ghost">🔄 Retry</button>
+                        </form>
+                    {% else %}
+                        <button class="btn btn-ghost" disabled style="cursor:not-allowed;opacity:0.5;">
+                            ⏳ Processing...
+                        </button>
+                    {% endif %}
+                    <form method="POST" action="{% url 'delete_lecture' lecture.pk %}"
+                          style="display:inline-block; margin:0;"
+                          onsubmit="return confirm('Are you sure you want to delete this lecture?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                    </form>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                <div class="es-icon">🎙️</div>
+                <h3>No lectures yet</h3>
+                <p>Upload your first audio or video lecture to get started.</p>
+                <a href="{% url 'upload' %}" class="btn btn-primary">⬆️ Upload First Lecture</a>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
 </div>
+
+<script>
+// Search filter
+const searchInput = document.getElementById('searchInput');
+if (searchInput) {
+    searchInput.addEventListener('input', () => {
+        const q = searchInput.value.toLowerCase();
+        document.querySelectorAll('.lecture-card').forEach(card => {
+            card.style.display = card.dataset.title.includes(q) ? '' : 'none';
+        });
+    });
+}
+
+// Poll for status updates on processing cards
+const processingCards = [...document.querySelectorAll('.lecture-card[data-status="PROCESSING"], .lecture-card[data-status="PENDING"]')];
+
+if (processingCards.length > 0) {
+    const ids = processingCards.map(c => c.id.replace('card-', ''));
+
+    function pollStatus() {
+        ids.forEach(id => {
+            fetch(`/api/status/${id}/`)
+                .then(r => r.json())
+                .then(data => {
+                    const card = document.getElementById(`card-${id}`);
+                    if (!card) return;
+                    if (data.status === 'DONE') {
+                        // Reload the page to show updated card with buttons
+                        location.reload();
+                    } else if (data.status === 'FAILED') {
+                        location.reload();
+                    }
+                    // Update badge
+                    const badge = card.querySelector('.badge');
+                    if (badge && data.status !== card.dataset.status) {
+                        location.reload();
+                    }
+                })
+                .catch(() => {});
+        });
+    }
+
+    // Poll every 4 seconds
+    setInterval(pollStatus, 4000);
+}
+</script>
 {% endblock %}
