@@ -1,95 +1,269 @@
 {% extends 'base.html' %}
+{% block title %}Upload Lecture — AI Notes{% endblock %}
+
+{% block extra_head %}
+<style>
+.upload-page { padding: 48px 0; }
+.upload-wrap { max-width: 640px; margin: 0 auto; }
+.page-header { margin-bottom: 32px; }
+.page-header h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+.page-header p { color: var(--text2); font-size: 15px; }
+
+.upload-card {
+    background: var(--glass); border: 1px solid var(--glass-b);
+    border-radius: 24px; padding: 36px; backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.form-group { margin-bottom: 24px; }
+.form-label { display: block; font-size: 13px; font-weight: 600;
+    color: var(--text2); margin-bottom: 8px; letter-spacing: 0.02em; }
+.form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px; padding: 13px 16px;
+    color: var(--text); font-size: 15px; font-family: 'Inter', sans-serif; outline: none;
+    transition: all 0.2s;
+}
+.form-input::placeholder { color: #475569; }
+.form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); background: rgba(255,255,255,0.06); }
+
+/* Drop Zone */
+.drop-zone {
+    border: 2px dashed rgba(99,102,241,0.35);
+    border-radius: 16px; padding: 48px 24px;
+    text-align: center; cursor: pointer;
+    transition: all 0.25s;
+    background: rgba(99,102,241,0.03);
+    position: relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent); background: rgba(99,102,241,0.08);
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+}
+.drop-zone.has-file { border-color: #10b981; background: rgba(16,185,129,0.06); }
+.dz-icon { font-size: 48px; margin-bottom: 16px; transition: transform 0.3s; }
+.drop-zone:hover .dz-icon { transform: translateY(-4px); }
+.dz-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.dz-sub { font-size: 13px; color: var(--text2); }
+.dz-badge { display: inline-block; margin-top: 14px; padding: 5px 14px; border-radius: 99px;
+    background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25);
+    font-size: 12px; font-weight: 600; color: var(--accent3); }
+
+/* File preview */
+.file-preview {
+    display: none; margin-top: 16px; padding: 14px 16px;
+    background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 12px; text-align: left;
+    align-items: center; gap: 12px;
+}
+.file-preview.show { display: flex; }
+.fp-icon { font-size: 28px; }
+.fp-info .fp-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.fp-info .fp-size { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* Info box */
+.info-box {
+    background: rgba(99,102,241,0.07); border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 24px;
+    font-size: 13px; color: var(--text2); line-height: 1.6;
+}
+.info-box strong { color: var(--accent3); }
+
+/* Submit button */
+.submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; border: none; border-radius: 12px;
+    padding: 15px; font-size: 16px; font-weight: 700;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.submit-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,0.55); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Processing overlay */
+.processing-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(3,7,18,0.92); backdrop-filter: blur(12px);
+    align-items: center; justify-content: center;
+}
+.processing-overlay.show { display: flex; }
+.proc-card { background: var(--bg3); border: 1px solid var(--glass-b);
+    border-radius: 24px; padding: 48px 40px; max-width: 420px; width: 90%; text-align: center; }
+.proc-spinner {
+    width: 64px; height: 64px; margin: 0 auto 24px;
+    border: 4px solid rgba(99,102,241,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.proc-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.proc-sub { font-size: 14px; color: var(--text2); }
+.proc-steps { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.proc-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; border-radius: 10px;
+    background: rgba(255,255,255,0.03); border: 1px solid transparent;
+    font-size: 13px; color: var(--text3); transition: all 0.4s;
+}
+.proc-step.active { border-color: rgba(99,102,241,0.3); color: var(--accent3);
+    background: rgba(99,102,241,0.08); }
+.proc-step .ps-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex-shrink:0; }
+.proc-step.active .ps-dot { animation: ping 1s ease-in-out infinite; }
+
+/* Field error */
+.field-error { color: #fca5a5; font-size: 12px; margin-top: 6px; display: block; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="max-w-xl mx-auto mt-16 bg-white p-8 rounded-2xl shadow-xl border border-gray-100 relative overflow-hidden">
-    
-    <div class="text-center mb-8">
-        <h2 class="text-3xl font-extrabold text-gray-900">AI Note Generator</h2>
-        <p class="text-gray-500 mt-2 text-sm">Upload your lecture and let AI do the magic.</p>
+<div class="upload-page">
+    <div class="container">
+        <div class="upload-wrap">
+            <div class="page-header">
+                <h1>⬆️ Upload Lecture</h1>
+                <p>Upload an audio or video file and let AI generate comprehensive notes for you.</p>
+            </div>
+
+            <div class="upload-card">
+                <!-- Limits info -->
+                <div class="info-box">
+                    📋 <strong>Supported formats:</strong> MP3, WAV, M4A, OGG (audio) • MP4, WebM, MOV (video)<br>
+                    📦 <strong>Max size:</strong> 50MB per upload. For best results, use MP3 audio (smallest size!)
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-error" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#fca5a5;">
+                    ❌ Please fix the errors below and try again.
+                </div>
+                {% endif %}
+
+                <!-- Loader Overlay (Hidden by default) -->
+                <div id="uploadLoader" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 15, 30, 0.85); backdrop-filter: blur(8px); z-index: 50; border-radius: 24px; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+                    <div style="width: 48px; height: 48px; border: 4px solid rgba(99, 102, 241, 0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+                    <h3 style="font-size: 20px; font-weight: 800; color: white; margin-bottom: 8px;">Uploading to Cloudinary...</h3>
+                    <p style="color: var(--text2); font-size: 14px;">Please wait, compressing and securely uploading your file.</p>
+                </div>
+                <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label class="form-label" for="id_title">Lecture Title</label>
+                        <input type="text" name="title" id="id_title" class="form-input"
+                               placeholder="E.g., Machine Learning — Lecture 3"
+                               value="{{ form.title.value|default:'' }}" required>
+                        {% if form.title.errors %}<span class="field-error">{{ form.title.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Upload File</label>
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('id_media_file').click()">
+                            <div class="dz-icon">🎙️</div>
+                            <div class="dz-title">Drop your file here</div>
+                            <div class="dz-sub">or click to browse</div>
+                            <div class="dz-badge">MP3 • WAV • MP4 • WebM • M4A</div>
+                        </div>
+                        <div class="file-preview" id="filePreview">
+                            <div class="fp-icon" id="fileIcon">🎵</div>
+                            <div class="fp-info">
+                                <div class="fp-name" id="fileName">—</div>
+                                <div class="fp-size" id="fileSize">—</div>
+                            </div>
+                            <div style="margin-left:auto;cursor:pointer;color:var(--text3);" onclick="clearFile()">✕</div>
+                        </div>
+                        <input type="file" name="media_file" id="id_media_file" class="hidden"
+                               accept="audio/*,video/*,.mp3,.wav,.m4a,.ogg,.mp4,.webm,.mov,.avi" required>
+                        {% if form.media_file.errors %}<span class="field-error">{{ form.media_file.errors.0 }}</span>{% endif %}
+                    </div>
+
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span id="btnText">⚡ Start AI Processing</span>
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
+</div>
 
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" class="space-y-6">
-        {% csrf_token %}
-        
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Lecture Title</label>
-            <input type="text" name="title" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" placeholder="E.g., Python Basics Class 1">
-        </div>
-
-        <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Audio/Video</label>
-            <input type="file" name="media_file" accept="audio/*,video/*" required class="w-full px-4 py-3 rounded-lg border border-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer">
-        </div>
-
-        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all flex justify-center items-center gap-2">
-            <span>Start Processing</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" /></svg>
-        </button>
-    </form>
-
-    <div id="loadingOverlay" class="absolute inset-0 bg-white/95 backdrop-blur-sm hidden flex-col justify-center items-center z-10">
-        
-        <div class="relative w-24 h-24 mb-6">
-            <div class="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
-            <div class="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-        </div>
-
-        <h3 id="statusText" class="text-xl font-bold text-gray-800 mb-2 transition-opacity duration-300">Preparing file...</h3>
-        <p id="subStatusText" class="text-sm text-gray-500 text-center px-6">Initializing background workers</p>
-        
-        <div class="mt-8 w-64 space-y-3">
-            <div id="step1" class="flex items-center gap-3 text-gray-400 text-sm font-medium"><div class="w-2 h-2 rounded-full bg-gray-300"></div> Uploading to Cloudinary</div>
-            <div id="step2" class="flex items-center gap-3 text-gray-400 text-sm font-medium"><div class="w-2 h-2 rounded-full bg-gray-300"></div> Redis passing task to Celery</div>
-            <div id="step3" class="flex items-center gap-3 text-gray-400 text-sm font-medium"><div class="w-2 h-2 rounded-full bg-gray-300"></div> Gemini AI Generating Notes</div>
+<!-- Processing Overlay -->
+<div class="processing-overlay" id="processingOverlay">
+    <div class="proc-card">
+        <div class="proc-spinner"></div>
+        <div class="proc-title" id="procTitle">Uploading...</div>
+        <div class="proc-sub" id="procSub">Sending your file to Cloudinary</div>
+        <div class="proc-steps">
+            <div class="proc-step active" id="ps1"><div class="ps-dot"></div> Uploading to Cloudinary</div>
+            <div class="proc-step" id="ps2"><div class="ps-dot"></div> Queuing AI task (Redis → Celery)</div>
+            <div class="proc-step" id="ps3"><div class="ps-dot"></div> Gemini AI analyzing lecture...</div>
         </div>
     </div>
 </div>
 
 <script>
-    const form = document.getElementById('uploadForm');
-    const overlay = document.getElementById('loadingOverlay');
-    const statusText = document.getElementById('statusText');
-    const subStatusText = document.getElementById('subStatusText');
-    const steps = [document.getElementById('step1'), document.getElementById('step2'), document.getElementById('step3')];
-    
-    // File input ko select karein
-    const fileInput = document.querySelector('input[type="file"]');
+const MAX_MB = 50;
+const MAX_BYTES = MAX_MB * 1024 * 1024;
+const fileInput = document.getElementById('id_media_file');
+const dropZone = document.getElementById('dropZone');
+const filePreview = document.getElementById('filePreview');
 
-    // 1. JS File Size Validation before upload
-    fileInput.addEventListener('change', function() {
-        const maxSize = 40 * 1024 * 1024; // 40 MB
-        if (this.files[0].size > maxSize) {
-            alert("File is too large! Please upload a file smaller than 40 MB. \nTip: MP3 Audio works best and uses less data!");
-            this.value = ""; // Clear the file input automatically
-        }
-    });
+// Drag-and-drop
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+    e.preventDefault(); dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) { setFileInput(file); }
+});
 
-    form.addEventListener('submit', function(e) {
-        // UI overlay show karein
-        overlay.classList.remove('hidden');
-        overlay.classList.add('flex');
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) setFileInput(fileInput.files[0]);
+});
 
-        setTimeout(() => {
-            statusText.innerText = "Uploading Media...";
-            subStatusText.innerText = "Compressing and sending to Cloudinary (Max 40MB)";
-            steps[0].classList.replace('text-gray-400', 'text-blue-600');
-            steps[0].children[0].classList.replace('bg-gray-300', 'bg-blue-600');
-        }, 500);
+function setFileInput(file) {
+    if (file.size > MAX_BYTES) {
+        alert(`⚠️ File too large! Max ${MAX_MB}MB.\nYour file: ${(file.size/1024/1024).toFixed(1)}MB\n\nTip: Convert to MP3 for smaller size!`);
+        fileInput.value = '';
+    }
+    const dt = new DataTransfer(); dt.items.add(file); fileInput.files = dt.files;
+    const isVideo = file.type.startsWith('video/');
+    document.getElementById('fileIcon').textContent = isVideo ? '🎬' : '🎵';
+    document.getElementById('fileName').textContent = file.name;
+    document.getElementById('fileSize').textContent = `${(file.size/1024/1024).toFixed(2)} MB`;
+    filePreview.classList.add('show');
+    dropZone.classList.add('has-file');
+    dropZone.querySelector('.dz-title').textContent = 'File selected ✓';
+    dropZone.querySelector('.dz-sub').textContent = 'Click to change';
+}
 
-        setTimeout(() => {
-            statusText.innerText = "Task Queued!";
-            subStatusText.innerText = "Celery worker picked up the task";
-            steps[1].classList.replace('text-gray-400', 'text-blue-600');
-            steps[1].children[0].classList.replace('bg-gray-300', 'bg-blue-600');
-        }, 3000);
+function clearFile() {
+    fileInput.value = ''; filePreview.classList.remove('show');
+    dropZone.classList.remove('has-file');
+    dropZone.querySelector('.dz-title').textContent = 'Drop your file here';
+    dropZone.querySelector('.dz-sub').textContent = 'or click to browse';
+}
 
-        setTimeout(() => {
-            statusText.innerText = "AI is Thinking...";
-            subStatusText.innerText = "Gemini 2.5 Flash is analyzing the context";
-            steps[2].classList.replace('text-gray-400', 'text-blue-600');
-            steps[2].children[0].classList.replace('bg-gray-300', 'bg-blue-600');
-            steps[2].classList.add('animate-pulse');
-        }, 6000);
-    });
+// Form submit with overlay
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    if (!fileInput.files[0]) { e.preventDefault(); alert('Please select a file.'); return; }
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    document.getElementById('btnText').textContent = 'Uploading...';
+    document.getElementById('processingOverlay').classList.add('show');
+
+    setTimeout(() => {
+        document.getElementById('ps2').classList.add('active');
+        document.getElementById('procTitle').textContent = 'Task Queued!';
+        document.getElementById('procSub').textContent = 'Celery worker picked up the job';
+    }, 2500);
+    setTimeout(() => {
+        document.getElementById('ps3').classList.add('active');
+        document.getElementById('procTitle').textContent = 'AI is thinking...';
+        document.getElementById('procSub').textContent = 'Gemini 2.5 Flash analyzing your lecture';
+    }, 5000);
+});
 </script>
 {% endblock %}
