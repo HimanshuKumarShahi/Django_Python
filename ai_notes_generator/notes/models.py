@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from cloudinary.models import CloudinaryField
 
 
 class LectureUpload(models.Model):
@@ -12,12 +11,7 @@ class LectureUpload(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lectures')
     title = models.CharField(max_length=255)
-    media_file = CloudinaryField(
-        'media',
-        resource_type='auto',
-        folder='AI_notes/media',
-        transformation=[{'quality': 'auto:eco'}],
-    )
+    media_file = models.FileField(upload_to='lectures/')
     file_type = models.CharField(max_length=10, default='audio', choices=[('audio', 'Audio'), ('video', 'Video')])
     processing_status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     error_message = models.TextField(blank=True, null=True)
@@ -49,8 +43,8 @@ class GeneratedNote(models.Model):
     skeleton_outline_json = models.JSONField(default=list, blank=True)
     topic_relationships_json = models.JSONField(default=list, blank=True)
     quiz_questions_json = models.JSONField(default=list, blank=True)
-    concept_graph_url = models.URLField(max_length=600, blank=True, null=True)
-    pdf_url = models.URLField(max_length=600, blank=True, null=True)
+    concept_graph_file = models.ImageField(upload_to='graphs/', blank=True, null=True)
+    pdf_file = models.FileField(upload_to='pdfs/', blank=True, null=True)
     ai_model_used = models.CharField(max_length=100, blank=True)
     processing_time_seconds = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
