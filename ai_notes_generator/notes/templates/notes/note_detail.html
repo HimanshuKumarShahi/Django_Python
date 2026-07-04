@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% block title %}{{ lecture.title }} — AI Notes{% endblock %}
+
+{% block extra_head %}
+<!-- Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- Mermaid.js for diagrams -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<!-- Prism.js for syntax highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+<style>
+.detail-page { padding: 36px 0 60px; }
+
+/* ── Header ── */
+.detail-header { margin-bottom: 28px; }
+.breadcrumb { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text3); margin-bottom:14px; }
+.breadcrumb a { color:var(--text3); text-decoration:none; } .breadcrumb a:hover { color:var(--accent); }
+.detail-title { font-size:30px; font-weight:900; line-height:1.2; margin-bottom:12px; }
+.detail-meta { display:flex; align-items:center; gap:16px; font-size:13px; color:var(--text2); flex-wrap:wrap; }
+.detail-meta span { display:flex; align-items:center; gap:6px; }
+.detail-actions { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+
+/* ── Tabs ── */
+.tabs-container { margin-bottom: 28px; }
+.tabs-nav {
+    display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:0;
+    overflow-x:auto; scrollbar-width:none;
+}
+.tabs-nav::-webkit-scrollbar { display:none; }
+.tab-btn {
+    flex-shrink:0; display:flex; align-items:center; gap:6px;
+    padding:10px 18px; border:none; background:transparent;
+    color:var(--text2); font-size:13px; font-weight:600;
+    cursor:pointer; font-family:'Inter',sans-serif;
+    border-bottom:2px solid transparent; transition:all 0.2s;
+    margin-bottom:-1px;
+}
+.tab-btn:hover { color:var(--text); }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+/* ── Notes tab ── */
+.notes-content {
+    background:var(--glass); border:1px solid var(--glass-b);
+    border-radius:20px; padding:36px; backdrop-filter:blur(16px);
+    line-height:1.8; font-size:15px; color:var(--text);
+    max-height:70vh; overflow-y:auto;
+}
+.notes-content h1 { font-size:24px; font-weight:800; color:var(--accent3); margin:28px 0 14px; border-bottom:1px solid var(--border); padding-bottom:10px; }
+.notes-content h2 { font-size:20px; font-weight:700; color:var(--text); margin:22px 0 10px; }
+.notes-content h3 { font-size:16px; font-weight:700; color:var(--accent2); margin:16px 0 8px; }
+.notes-content p { margin-bottom:12px; color:var(--text2); }
+.notes-content ul, .notes-content ol { margin:8px 0 12px 24px; }
+.notes-content li { margin-bottom:6px; color:var(--text2); }
+.notes-content code { background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.2);
+    padding:2px 6px; border-radius:5px; font-size:13px; font-family:monospace; color:#a5b4fc; }
+.notes-content pre { background:#0d1117; border:1px solid var(--border); border-radius:12px;
+    padding:16px; overflow-x:auto; margin:14px 0; }
+.notes-content pre code { background:none; border:none; padding:0; color:inherit; }
+.notes-content strong { color:var(--text); font-weight:700; }
+.notes-content blockquote { border-left:3px solid var(--accent); padding-left:16px; color:var(--text3); margin:14px 0; }
+
+/* ── Mermaid tab ── */
+.mermaid-wrap { background:var(--glass); border:1px solid var(--glass-b); border-radius:20px;
+    padding:36px; text-align:center; overflow:auto; }
+.mermaid { display:flex; justify-content:center; }
+
+/* ── Graph tab ── */
+.graph-wrap { background:var(--glass); border:1px solid var(--glass-b); border-radius:20px; overflow:hidden; }
+.graph-wrap img { width:100%; height:auto; display:block; }
+
+/* ── Concepts tab ── */
+.concepts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.concept-card {
+    background:var(--glass); border:1px solid var(--glass-b); border-radius:14px; padding:18px;
+    transition:all 0.2s;
+}
+.concept-card:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-2px); }
+.concept-term { font-size:15px; font-weight:700; color:var(--accent3); margin-bottom:8px; }
+.concept-def { font-size:13px; color:var(--text2); line-height:1.65; margin-bottom:12px; }
+.concept-imp { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:700; }
+.imp-high   { background:rgba(239,68,68,0.12);  border:1px solid rgba(239,68,68,0.25);  color:#fca5a5; }
+.imp-medium { background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.25); color:#fcd34d; }
+.imp-low    { background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.25); color:#6ee7b7; }
+
+/* ── Skeleton tab ── */
+.skeleton-tree { background:var(--glass); border:1px solid var(--glass-b); border-radius:20px; padding:28px; }
+.skeleton-item { padding:6px 12px; border-radius:8px; font-size:13px; margin:2px 0; cursor:pointer; }
+.skeleton-item:hover { background:var(--card-h); }
+.si-h1 { font-size:16px; font-weight:800; color:var(--accent3); margin-top:16px; }
+.si-h2 { font-size:14px; font-weight:700; color:var(--text); padding-left:20px; }
+.si-h3 { font-size:13px; font-weight:600; color:var(--text2); padding-left:40px; }
+.si-deep { font-size:12px; color:var(--text3); padding-left:56px; }
+
+/* ── Quiz tab ── */
+.quiz-list { display:flex; flex-direction:column; gap:16px; }
+.quiz-item { background:var(--glass); border:1px solid var(--glass-b); border-radius:14px; overflow:hidden; }
+.quiz-q { padding:16px 20px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.quiz-q-text { font-size:14px; font-weight:600; color:var(--text); line-height:1.5; }
+.quiz-arrow { flex-shrink:0; color:var(--text3); transition:transform 0.3s; font-size:18px; }
+.quiz-a {
+    max-height:0; overflow:hidden; transition:max-height 0.35s ease;
+    border-top:1px solid transparent;
+}
+.quiz-item.open .quiz-a { max-height:200px; border-top-color:var(--border); }
+.quiz-item.open .quiz-arrow { transform:rotate(180deg); }
+.quiz-a-inner { padding:14px 20px; font-size:13px; color:var(--text2); line-height:1.7;
+    background:rgba(16,185,129,0.05); }
+
+/* ── PDF tab ── */
+.pdf-card { background:var(--glass); border:1px solid var(--glass-b); border-radius:20px; padding:40px; text-align:center; }
+.pdf-icon { font-size:72px; margin-bottom:16px; }
+.pdf-card h3 { font-size:22px; font-weight:800; margin-bottom:8px; }
+.pdf-card p { color:var(--text2); margin-bottom:28px; font-size:15px; line-height:1.7; }
+.pdf-features { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:32px; }
+.pdf-feat-tag { background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.2);
+    border-radius:99px; padding:5px 14px; font-size:12px; color:var(--accent3); font-weight:600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="container">
+
+        <!-- Header -->
+        <div class="detail-header">
+            <div class="breadcrumb">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <span>›</span>
+                <span>{{ lecture.title|truncatechars:40 }}</span>
+            </div>
+            <h1 class="detail-title">{{ lecture.title }}</h1>
+            <div class="detail-meta">
+                <span>{% if lecture.file_type == 'audio' %}🎵{% else %}🎬{% endif %} {{ lecture.file_type|capfirst }}</span>
+                <span>📅 {{ lecture.uploaded_at|date:"F d, Y" }}</span>
+                {% if note.processing_time_seconds %}
+                <span>⏱️ Processed in {{ note.processing_time_seconds|floatformat:1 }}s</span>
+                {% endif %}
+                {% if note.ai_model_used %}
+                <span>🤖 {{ note.ai_model_used }}</span>
+                {% endif %}
+                <span>📝 {{ note.word_count }} words</span>
+                <span>🧩 {{ note.concept_count }} concepts</span>
+            </div>
+            <div class="detail-actions">
+                <a href="{% url 'download_pdf' lecture.pk %}" class="btn btn-primary" target="_blank">📄 Download PDF</a>
+                <form method="POST" action="{% url 're_evaluate' lecture.pk %}" style="display:contents;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-ghost">🔄 Re-evaluate</button>
+                </form>
+                <a href="{% url 'dashboard' %}" class="btn btn-ghost">← Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        {% if note.summary_text %}
+        <div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:14px;padding:16px 20px;margin-bottom:28px;font-size:14px;color:var(--text2);line-height:1.7;">
+            <strong style="color:var(--accent3);">📋 Summary:</strong> {{ note.summary_text }}
+        </div>
+        {% endif %}
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs-nav">
+                <button class="tab-btn active" data-tab="notes">📝 Full Notes</button>
+                <button class="tab-btn" data-tab="concepts">🧩 Concepts</button>
+                <button class="tab-btn" data-tab="diagram">🗺️ Diagram</button>
+                {% if note.concept_graph_url %}
+                <button class="tab-btn" data-tab="graph">📊 Graph</button>
+                {% endif %}
+                <button class="tab-btn" data-tab="skeleton">🗂️ Skeleton</button>
+                <button class="tab-btn" data-tab="quiz">❓ Quiz</button>
+                <button class="tab-btn" data-tab="pdf">📄 PDF</button>
+            </div>
+        </div>
+
+        <!-- Tab: Full Notes -->
+        <div class="tab-panel active" id="tab-notes">
+            <!-- Hidden markdown source for safe JS rendering -->
+            <script id="markdown-data" type="text/plain">{{ note.summary_markdown }}</script>
+            <div class="notes-content" id="notesContent">
+                <!-- Markdown rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Key Concepts -->
+        <div class="tab-panel" id="tab-concepts">
+            <div class="concepts-grid">
+                {% for concept in key_concepts %}
+                <div class="concept-card">
+                    <div class="concept-term">{{ concept.term }}</div>
+                    <div class="concept-def">{{ concept.definition }}</div>
+                    <span class="concept-imp imp-{{ concept.importance|default:'medium' }}">
+                        {% if concept.importance == 'high' %}🔴{% elif concept.importance == 'low' %}🟢{% else %}🟡{% endif %}
+                        {{ concept.importance|default:'medium'|capfirst }} Priority
+                    </span>
+                </div>
+                {% empty %}
+                <p style="color:var(--text2);">No concepts extracted yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab: Mermaid Diagram -->
+        <div class="tab-panel" id="tab-diagram">
+            <div class="mermaid-wrap">
+                {% if mermaid_code %}
+                <div class="mermaid">
+                    {{ mermaid_code }}
+                </div>
+                {% else %}
+                <p style="color:var(--text2);">No diagram generated for this lecture.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab: Concept Graph Image -->
+        {% if note.concept_graph_url %}
+        <div class="tab-panel" id="tab-graph">
+            <div class="graph-wrap">
+                <img src="{{ note.concept_graph_url }}" alt="Concept relationship graph for {{ lecture.title }}" loading="lazy">
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Tab: Skeleton Outline -->
+        <div class="tab-panel" id="tab-skeleton">
+            <div class="skeleton-tree">
+                {% for item in skeleton_outline %}
+                    {% if item|slice:":2" == "# " %}
+                    <div class="skeleton-item si-h1">{{ item|slice:"2:" }}</div>
+                    {% elif item|slice:":4" == "    " and item|slice:"4:6" == "# " %}
+                    <div class="skeleton-item si-h3">{{ item|slice:"6:" }}</div>
+                    {% elif item|slice:":2" == "  " and item|slice:"2:4" == "# " %}
+                    <div class="skeleton-item si-h2">{{ item|slice:"4:" }}</div>
+                    {% else %}
+                    <div class="skeleton-item si-deep">{{ item }}</div>
+                    {% endif %}
+                {% empty %}
+                <p style="color:var(--text2);">No outline available.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab: Quiz -->
+        <div class="tab-panel" id="tab-quiz">
+            <div class="quiz-list">
+                {% for qa in quiz_questions %}
+                <div class="quiz-item" id="quiz-{{ forloop.counter }}">
+                    <div class="quiz-q" onclick="toggleQuiz('{{ forloop.counter }}')">
+                        <div class="quiz-q-text">
+                            <span style="color:var(--accent3);font-weight:800;margin-right:8px;">Q{{ forloop.counter }}.</span>
+                            {{ qa.question }}
+                        </div>
+                        <span class="quiz-arrow">⌄</span>
+                    </div>
+                    <div class="quiz-a">
+                        <div class="quiz-a-inner">
+                            <strong style="color:#6ee7b7;">Answer:</strong> {{ qa.answer }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color:var(--text2);">No quiz questions generated.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tab: PDF -->
+        <div class="tab-panel" id="tab-pdf">
+            <div class="pdf-card">
+                <div class="pdf-icon">📄</div>
+                <h3>Your Notes as a Beautiful PDF</h3>
+                <p>A fully branded, multi-page PDF containing your complete lecture notes, key concepts table, concept map graph, and quiz questions — ready to download or print.</p>
+                <div class="pdf-features">
+                    <span class="pdf-feat-tag">🎨 Cover Page</span>
+                    <span class="pdf-feat-tag">📋 Key Concepts Table</span>
+                    <span class="pdf-feat-tag">📝 Full Notes</span>
+                    <span class="pdf-feat-tag">🗺️ Concept Map</span>
+                    <span class="pdf-feat-tag">🗂️ Skeleton Outline</span>
+                    <span class="pdf-feat-tag">❓ Quiz & Answers</span>
+                </div>
+                {% if note.pdf_url %}
+                <a href="{% url 'download_pdf' lecture.pk %}" target="_blank"
+                   class="btn btn-primary" style="font-size:16px;padding:14px 32px;">
+                    📥 Download PDF
+                </a>
+                {% else %}
+                <p style="color:var(--text3);">PDF not available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ── Tab switching ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// ── Render Markdown ──
+const markdownEl = document.getElementById('markdown-data');
+const rawMarkdown = markdownEl ? markdownEl.textContent : '';
+document.getElementById('notesContent').innerHTML = marked.parse(rawMarkdown || '# Notes\n\nNo notes available yet.');
+Prism.highlightAll();
+
+// ── Mermaid ──
+mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+        darkMode: true,
+        background: '#0a0f1e',
+        primaryColor: '#6366f1',
+        primaryTextColor: '#e2e8f0',
+        primaryBorderColor: '#4f46e5',
+        lineColor: '#8b5cf6',
+        secondaryColor: '#1e1b4b',
+        tertiaryColor: '#0f1629',
+    }
+});
+
+// ── Quiz toggle ──
+function toggleQuiz(n) {
+    const item = document.getElementById('quiz-' + n);
+    item.classList.toggle('open');
+}
+</script>
+{% endblock %}
