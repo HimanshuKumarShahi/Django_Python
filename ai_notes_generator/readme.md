@@ -180,7 +180,7 @@ Ensure Docker Desktop is open, then run:
 ```bash
 docker-compose up -d --build
 ```
-> **Note:** The `docker-compose.yml` is heavily optimized with memory limits and concurrency caps to prevent system lag on lower-end machines (like i3 processors with 8GB RAM).
+> **Note:** The `docker-compose.yml` is heavily optimized with memory limits and concurrency caps to prevent system lag on lower-end machines.
 
 ### 6. Database Migrations
 Apply the initial Django database migrations to set up your SQLite DB:
@@ -239,30 +239,6 @@ ai_notes_generator/
 ```
 
 ---
-
-# Application Modernization & Optimization
-
-## 🚀 Extreme Speed Improvements (Local Storage)
-Cloudinary has been completely removed from the pipeline. 
-- You will no longer wait for Django to upload the file to Cloudinary.
-- You will no longer wait for the Celery worker to download the file from Cloudinary.
-- Your AI generation time should now be **30 to 40 seconds faster** for large files because everything is handled instantly on the local disk!
-- `MEDIA_ROOT` and `MEDIA_URL` have been configured to securely serve files locally.
-
-## 🎵 Custom Built-in Media Player
-A sleek, modern Media Player has been embedded directly above the Notes section on the `note_detail` page.
-- Fully custom UI matching the Shadcn / Aceternity design.
-- Features custom **Play/Pause**, **Forward 10s**, and **Rewind 10s** buttons.
-- Features a responsive, animated progress bar.
-- Automatically handles both Audio and Video files flawlessly.
-
-## ✨ Shadcn UI Button Overhaul
-All buttons across the app have been overhauled to mimic the highly-sought-after **Shadcn UI** aesthetics:
-- `btn-primary`: Now high-contrast (off-white on dark mode) with subtle drop shadows.
-- `btn-ghost`: Fully transparent, revealing a subtle muted background on hover.
-- Sharp `border-radius: 6px` replacing the overly bubbly borders.
-- Crisp focus rings `focus-visible:ring-2` to ensure accessibility and premium interaction feel.
-
 
 ## 🔮 Future Roadmap / Upcoming Features
 - [ ] **Vector Database Search**: Implementing a RAG pipeline allowing users to chat directly with their uploaded notes.
